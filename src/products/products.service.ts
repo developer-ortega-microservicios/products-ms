@@ -1,8 +1,7 @@
-import { Injectable, NotFoundException, OnModuleInit } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateProductDto } from './dto/create-product.dto.js';
 import { UpdateProductDto } from './dto/update-product.dto.js';
 import { PrismaService } from '../prisma.service.js';
-import { PrismaClient } from '../generated/prisma/client.js';
 import { PaginationDto } from '../common/dto/pagination.dto.js';
 
 @Injectable()
@@ -21,13 +20,16 @@ export class ProductsService {
 
     const { page , limit } = paginationDto;
 
-    const totalPages = await this.prisma.product.count();
+    const totalPages = await this.prisma.product.count({ where: {available: true}});
     const lastPage = Math.ceil( totalPages / limit);
 
     return {
       data: await this.prisma.product.findMany({
         skip: (page - 1) * limit,
-        take: limit
+        take: limit,
+        where: {
+          available: true
+        }
       }),
       meta: {
         total: totalPages,
@@ -39,7 +41,7 @@ export class ProductsService {
 
   async findOne(id: number) {
     const product = await this.prisma.product.findFirst({
-      where: { id }
+      where: { id, available: true }
     });
 
     if(!product){
@@ -62,8 +64,17 @@ export class ProductsService {
 
     await this.findOne(id);
 
-    return this.prisma.product.delete({
-      where: {id}
-    });
+    const product = await this.prisma.product.update({
+      where: {id},
+      data: {
+        available: false
+      }
+    })
+
+    return product;
+
+    // return this.prisma.product.delete({
+    //   where: {id}
+    // });
   }
 }
