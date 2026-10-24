@@ -1,8 +1,8 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { PaginationDto } from '../common/dto/pagination.dto.js';
+import { PrismaService } from '../prisma.service.js';
 import { CreateProductDto } from './dto/create-product.dto.js';
 import { UpdateProductDto } from './dto/update-product.dto.js';
-import { PrismaService } from '../prisma.service.js';
-import { PaginationDto } from '../common/dto/pagination.dto.js';
 
 @Injectable()
 export class ProductsService {
@@ -51,12 +51,14 @@ export class ProductsService {
   }
 
   async update(id: number, updateProductDto: UpdateProductDto) {
+
+    const { id: __, ...data } = updateProductDto;
     
     await this.findOne(id);
 
     return this.prisma.product.update({
       where: {id},
-      data: updateProductDto
+      data: data
     })
   }
 
