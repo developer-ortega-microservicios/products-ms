@@ -3,11 +3,12 @@ import { CreateProductDto } from './dto/create-product.dto.js';
 import { UpdateProductDto } from './dto/update-product.dto.js';
 import { PrismaService } from '../prisma.service.js';
 import { PrismaClient } from '../generated/prisma/client.js';
+import { PaginationDto } from '../common/dto/pagination.dto.js';
 
 @Injectable()
-export class ProductsService{
+export class ProductsService {
 
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService) { }
 
   async create(createProductDto: CreateProductDto) {
     const product = await this.prisma.product.create({
@@ -16,10 +17,24 @@ export class ProductsService{
     return product;
   }
 
-  findAll() {
-    return this.prisma.product.findMany({
-      
-    })
+  async findAll(paginationDto: PaginationDto) {
+
+    const { page , limit } = paginationDto;
+
+    const totalPages = await this.prisma.product.count();
+    const lastPage = Math.ceil( totalPages / limit);
+
+    return {
+      data: await this.prisma.product.findMany({
+        skip: (page - 1) * limit,
+        take: limit
+      }),
+      meta: {
+        total: totalPages,
+        page: page,
+        lastPage: lastPage
+      }
+    }
   }
 
   findOne(id: number) {
