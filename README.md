@@ -23,7 +23,7 @@ Microservicio de productos hecho con **NestJS** y **TypeScript**, parte del proy
 
 1. Clonar el repositorio:
    ```bash
-   git clone https://github.com/developer-ortega/products-ms.git
+   git clone https://github.com/developer-ortega-microservicios/products-ms.git
    cd products-ms
    ```
 
