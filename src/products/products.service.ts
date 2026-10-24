@@ -1,10 +1,11 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, OnModuleInit } from '@nestjs/common';
 import { CreateProductDto } from './dto/create-product.dto.js';
 import { UpdateProductDto } from './dto/update-product.dto.js';
 import { PrismaService } from '../prisma.service.js';
+import { PrismaClient } from '../generated/prisma/client.js';
 
 @Injectable()
-export class ProductsService {
+export class ProductsService{
 
   constructor(private prisma: PrismaService) {}
 
@@ -16,7 +17,9 @@ export class ProductsService {
   }
 
   findAll() {
-    return `This action returns all products`;
+    return this.prisma.product.findMany({
+      
+    })
   }
 
   findOne(id: number) {
