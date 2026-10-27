@@ -1,34 +1,43 @@
 # Products Microservice
 
-Microservicio de productos hecho con **NestJS** y **TypeScript**, parte del proyecto del curso [NestJS + Microservicios](https://www.udemy.com/course/nestjs-microservicios/) (Udemy, DevTalles).
+Microservicio de productos hecho con **NestJS**, **Prisma** y **TypeScript**, parte del proyecto del curso [NestJS + Microservicios](https://www.udemy.com/course/nestjs-microservicios/) (Udemy, DevTalles). Escucha mensajes de **NATS**; no expone HTTP directamente, el acceso es a través del [client-gateway](https://github.com/developer-ortega-microservicios/client-gateway).
 
 > Proyecto de práctica, **en progreso**. Se actualiza a medida que avanza el curso.
 
-## Qué se va a construir
+## Arquitectura
+
+```
+client-gateway  ──NATS──→  products-ms  →  SQLite (Prisma)
+orders-ms       ──NATS──→  products-ms   (validación de productos)
+```
+
+Repositorios relacionados en la organización [developer-ortega-microservicios](https://github.com/developer-ortega-microservicios).
+
+## Funcionalidades
 
 - CRUD de productos con paginación
-- Base de datos con **Prisma** (SQLite)
-- Validación de datos con DTOs y variables de entorno
-- Comunicación por **Message Patterns** (TCP, luego NATS)
-- Integración con un API Gateway y con el microservicio de órdenes
+- Eliminación suave (el producto se marca como no disponible)
+- Validación de productos por ids, usada por `orders-ms`
+- Comunicación por **Message Patterns** sobre NATS
+- Manejo de excepciones RPC
+- Variables de entorno validadas con **Joi**
 
 ## Stack técnico
 
 - **NestJS** + **TypeScript**
 - **Prisma** + **SQLite**
-- **Vitest** — pruebas
-- **Oxlint** y **Prettier** — calidad y formato del código
+- **NATS** (`@nestjs/microservices`)
+- **Joi** y **class-validator**
+- **Vitest**, **Oxlint** y **Prettier**
 
 ## Cómo correrlo localmente
 
-1. Clonar el repositorio:
+1. Tener corriendo el servidor de NATS (ver el README del [client-gateway](https://github.com/developer-ortega-microservicios/client-gateway)).
+
+2. Clonar e instalar:
    ```bash
    git clone https://github.com/developer-ortega-microservicios/products-ms.git
    cd products-ms
-   ```
-
-2. Instalar dependencias:
-   ```bash
    npm install
    ```
    Si npm falla con `Cannot read properties of null (reading 'edgesOut')`, usar `npm install --legacy-peer-deps`.
@@ -37,12 +46,28 @@ Microservicio de productos hecho con **NestJS** y **TypeScript**, parte del proy
    ```
    PORT=3001
    DATABASE_URL="file:./dev.db"
+   NATS_SERVERS=nats://localhost:4222
    ```
 
-4. Iniciar en modo desarrollo:
+4. Generar el cliente de Prisma y crear la base de datos:
+   ```bash
+   npx prisma generate
+   npx prisma migrate dev
+   ```
+   El cliente generado (`src/generated/prisma`) no se sube al repositorio, por eso hay que ejecutar `prisma generate`.
+
+5. Iniciar en modo desarrollo:
    ```bash
    npm run start:dev
    ```
+
+## Variables de entorno
+
+| Variable | Descripción |
+|----------|-------------|
+| `PORT` | Puerto del servicio |
+| `DATABASE_URL` | Ruta de la base de datos SQLite |
+| `NATS_SERVERS` | Servidores de NATS, separados por coma |
 
 ## Scripts disponibles
 
