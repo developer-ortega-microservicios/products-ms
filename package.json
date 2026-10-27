@@ -14,7 +14,7 @@
     "start:dev": "npm run docker:start && nest start --watch",
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/main",
-    "docker:start": "prisma migrate dev && prisma generate",
+    "docker:start": "prisma generate && prisma migrate deploy",
     "lint": "oxlint src/ test/",
     "test": "vitest run",
     "test:watch": "vitest",
